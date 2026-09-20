@@ -1,0 +1,37 @@
+{
+  "version": "v1",
+  "source": "github.com/primandproper/primitives-go",
+  "files": [
+    {
+      "path": "vectors/bitmask.json",
+      "sha256": "f6a9e88acad658b70eac5c6637c211caf0457dca9b4e94b842d74caed597e100",
+      "package": "bitmask",
+      "cases": 18
+    },
+    {
+      "path": "vectors/encoding.json",
+      "sha256": "dc541458e4b3833253deccba4379dcb62523d1cf3df8c3602e06f601973f7f7c",
+      "package": "encoding",
+      "cases": 4
+    },
+    {
+      "path": "vectors/errors.json",
+      "sha256": "0db92f21659ce8d2223e4e2baf4d007556bf44809e68692dcdee8e7c5e20c7dc",
+      "package": "errors",
+      "cases": 20
+    },
+    {
+      "path": "vectors/numbers.json",
+      "sha256": "3c02f145760e157ec8957794d4fda7fd411cac78b68c99886dd1c8fee7d50cf7",
+      "package": "numbers",
+      "cases": 11
+    },
+    {
+      "path": "vectors/retry.json",
+      "sha256": "d3573ad8d83496909bf9f506d3a3bfeb6962002224f305baee700cba72b12403",
+      "package": "retry",
+      "cases": 5
+    }
+  ],
+  "totalCases": 58
+}

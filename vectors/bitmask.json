@@ -1,0 +1,191 @@
+{
+  "package": "bitmask",
+  "description": "Flag-set algebra over an unsigned integer. Values are decimal integers, not bit strings.",
+  "cases": [
+    {
+      "expect": 5,
+      "id": "new-sets-listed-flags",
+      "input": {
+        "flags": [
+          1,
+          4
+        ]
+      },
+      "op": "new"
+    },
+    {
+      "expect": 0,
+      "id": "new-of-nothing-is-zero",
+      "input": {
+        "flags": []
+      },
+      "op": "new"
+    },
+    {
+      "expect": true,
+      "id": "zero-is-empty",
+      "input": {
+        "value": 0
+      },
+      "op": "isEmpty"
+    },
+    {
+      "expect": false,
+      "id": "nonzero-is-not-empty",
+      "input": {
+        "value": 1
+      },
+      "op": "isEmpty"
+    },
+    {
+      "expect": 11,
+      "id": "set-adds-flags",
+      "input": {
+        "flags": [
+          2,
+          8
+        ],
+        "value": 1
+      },
+      "op": "set"
+    },
+    {
+      "expect": 1,
+      "id": "set-existing-is-idempotent",
+      "input": {
+        "flags": [
+          1
+        ],
+        "value": 1
+      },
+      "op": "set"
+    },
+    {
+      "expect": 5,
+      "id": "clear-removes-only-named",
+      "input": {
+        "flags": [
+          2
+        ],
+        "value": 7
+      },
+      "op": "clear"
+    },
+    {
+      "expect": 1,
+      "id": "clear-absent-is-noop",
+      "input": {
+        "flags": [
+          2
+        ],
+        "value": 1
+      },
+      "op": "clear"
+    },
+    {
+      "expect": 5,
+      "id": "toggle-flips-each",
+      "input": {
+        "flags": [
+          2,
+          4
+        ],
+        "value": 3
+      },
+      "op": "toggle"
+    },
+    {
+      "expect": true,
+      "id": "has-present",
+      "input": {
+        "flag": 4,
+        "value": 5
+      },
+      "op": "has"
+    },
+    {
+      "expect": false,
+      "id": "has-absent",
+      "input": {
+        "flag": 2,
+        "value": 5
+      },
+      "op": "has"
+    },
+    {
+      "expect": false,
+      "id": "hasAll-partial-is-false",
+      "input": {
+        "flags": [
+          1,
+          2
+        ],
+        "value": 5
+      },
+      "op": "hasAll"
+    },
+    {
+      "expect": true,
+      "id": "hasAll-complete-is-true",
+      "input": {
+        "flags": [
+          1,
+          4
+        ],
+        "value": 5
+      },
+      "op": "hasAll"
+    },
+    {
+      "expect": true,
+      "id": "hasAny-one-match-is-true",
+      "input": {
+        "flags": [
+          2,
+          4
+        ],
+        "value": 5
+      },
+      "op": "hasAny"
+    },
+    {
+      "expect": false,
+      "id": "hasAny-no-match-is-false",
+      "input": {
+        "flags": [
+          2,
+          8
+        ],
+        "value": 5
+      },
+      "op": "hasAny"
+    },
+    {
+      "expect": false,
+      "id": "hasAny-on-empty-is-false",
+      "input": {
+        "flags": [
+          1
+        ],
+        "value": 0
+      },
+      "op": "hasAny"
+    },
+    {
+      "expect": 3,
+      "id": "count-counts-set-bits",
+      "input": {
+        "value": 13
+      },
+      "op": "count"
+    },
+    {
+      "expect": 0,
+      "id": "count-of-empty-is-zero",
+      "input": {
+        "value": 0
+      },
+      "op": "count"
+    }
+  ]
+}

@@ -1,0 +1,185 @@
+{
+  "package": "retry",
+  "description": "The exponential backoff schedule with jitter off. Delays are milliseconds.",
+  "cases": [
+    {
+      "expect": {
+        "delayForMs": [
+          100,
+          200,
+          400,
+          800,
+          1600,
+          3200,
+          5000,
+          5000
+        ],
+        "scheduledDelayForMs": [
+          100,
+          200,
+          400,
+          800,
+          1600,
+          3200,
+          5000,
+          5000
+        ]
+      },
+      "id": "defaults-no-jitter",
+      "input": {
+        "attempts": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "initialDelayMs": 100,
+        "maxDelayMs": 5000,
+        "multiplier": 2,
+        "useJitter": false
+      },
+      "op": "schedule"
+    },
+    {
+      "expect": {
+        "delayForMs": [
+          10,
+          30,
+          90,
+          100,
+          100,
+          100,
+          100,
+          100
+        ],
+        "scheduledDelayForMs": [
+          10,
+          30,
+          90,
+          100,
+          100,
+          100,
+          100,
+          100
+        ]
+      },
+      "id": "fast-tight-cap",
+      "input": {
+        "attempts": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "initialDelayMs": 10,
+        "maxDelayMs": 100,
+        "multiplier": 3,
+        "useJitter": false
+      },
+      "op": "schedule"
+    },
+    {
+      "expect": {
+        "delayForMs": [
+          250,
+          250,
+          250,
+          250,
+          250,
+          250,
+          250,
+          250
+        ],
+        "scheduledDelayForMs": [
+          250,
+          250,
+          250,
+          250,
+          250,
+          250,
+          250,
+          250
+        ]
+      },
+      "id": "multiplier-one-is-flat",
+      "input": {
+        "attempts": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "initialDelayMs": 250,
+        "maxDelayMs": 10000,
+        "multiplier": 1,
+        "useJitter": false
+      },
+      "op": "schedule"
+    },
+    {
+      "expect": {
+        "delayForMs": [
+          50,
+          100,
+          200,
+          400,
+          800,
+          1000,
+          1000,
+          1000
+        ],
+        "scheduledDelayForMs": [
+          50,
+          100,
+          200,
+          400,
+          800,
+          1000,
+          1000,
+          1000
+        ]
+      },
+      "id": "multiplier-below-one-clamped",
+      "input": {
+        "attempts": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "initialDelayMs": 50,
+        "maxDelayMs": 1000,
+        "multiplier": 2,
+        "useJitter": false
+      },
+      "op": "schedule"
+    },
+    {
+      "expect": 100,
+      "id": "attempt-zero-treated-as-first",
+      "input": {
+        "attempt": 0,
+        "initialDelayMs": 100,
+        "maxDelayMs": 5000,
+        "multiplier": 2
+      },
+      "op": "delayFor"
+    }
+  ]
+}
