@@ -1,0 +1,166 @@
+{
+  "package": "errors",
+  "description": "The error-code to HTTP-status mapping. A port that disagrees here returns the wrong status to a real client.",
+  "cases": [
+    {
+      "expect": 500,
+      "id": "status-for-E100",
+      "input": {
+        "code": "E100"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 401,
+      "id": "status-for-E101",
+      "input": {
+        "code": "E101"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 400,
+      "id": "status-for-E102",
+      "input": {
+        "code": "E102"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 400,
+      "id": "status-for-E103",
+      "input": {
+        "code": "E103"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 404,
+      "id": "status-for-E104",
+      "input": {
+        "code": "E104"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 500,
+      "id": "status-for-E105",
+      "input": {
+        "code": "E105"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 502,
+      "id": "status-for-E106",
+      "input": {
+        "code": "E106"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 500,
+      "id": "status-for-E107",
+      "input": {
+        "code": "E107"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 500,
+      "id": "status-for-E108",
+      "input": {
+        "code": "E108"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 403,
+      "id": "status-for-E109",
+      "input": {
+        "code": "E109"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 403,
+      "id": "status-for-E110",
+      "input": {
+        "code": "E110"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 500,
+      "id": "status-for-E111",
+      "input": {
+        "code": "E111"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 503,
+      "id": "status-for-E112",
+      "input": {
+        "code": "E112"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 409,
+      "id": "status-for-E113",
+      "input": {
+        "code": "E113"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 422,
+      "id": "status-for-E114",
+      "input": {
+        "code": "E114"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 409,
+      "id": "status-for-E115",
+      "input": {
+        "code": "E115"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 429,
+      "id": "status-for-E116",
+      "input": {
+        "code": "E116"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 401,
+      "id": "status-for-E117",
+      "input": {
+        "code": "E117"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 402,
+      "id": "status-for-E118",
+      "input": {
+        "code": "E118"
+      },
+      "op": "httpStatusForCode"
+    },
+    {
+      "expect": 402,
+      "id": "status-for-E119",
+      "input": {
+        "code": "E119"
+      },
+      "op": "httpStatusForCode"
+    }
+  ]
+}

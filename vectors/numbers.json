@@ -1,0 +1,114 @@
+{
+  "package": "numbers",
+  "description": "Decimal rounding and scaling at 32-bit float precision. Expected values are the shortest decimal that round-trips a float32.",
+  "cases": [
+    {
+      "expect": 1,
+      "id": "round-half-up",
+      "input": {
+        "precision": 2,
+        "value": 1.005
+      },
+      "op": "roundToDecimalPlaces"
+    },
+    {
+      "expect": 1,
+      "id": "round-down",
+      "input": {
+        "precision": 2,
+        "value": 1.0049
+      },
+      "op": "roundToDecimalPlaces"
+    },
+    {
+      "expect": 3,
+      "id": "round-to-zero-places",
+      "input": {
+        "precision": 0,
+        "value": 2.5
+      },
+      "op": "roundToDecimalPlaces"
+    },
+    {
+      "expect": -1.235,
+      "id": "round-negative",
+      "input": {
+        "precision": 3,
+        "value": -1.2345
+      },
+      "op": "roundToDecimalPlaces"
+    },
+    {
+      "expect": 3.14,
+      "id": "round-already-exact",
+      "input": {
+        "precision": 2,
+        "value": 3.14
+      },
+      "op": "roundToDecimalPlaces"
+    },
+    {
+      "expect": 5,
+      "id": "scale-double",
+      "input": {
+        "factor": 2,
+        "precision": 2,
+        "value": 2.5
+      },
+      "op": "scale"
+    },
+    {
+      "expect": 3.5,
+      "id": "scale-half",
+      "input": {
+        "factor": 0.5,
+        "precision": 2,
+        "value": 7
+      },
+      "op": "scale"
+    },
+    {
+      "expect": 0,
+      "id": "scale-by-zero",
+      "input": {
+        "factor": 0,
+        "precision": 2,
+        "value": 9.99
+      },
+      "op": "scale"
+    },
+    {
+      "expect": 3,
+      "id": "yield-double-batch",
+      "input": {
+        "desiredYield": 8,
+        "originalYield": 4,
+        "precision": 2,
+        "value": 1.5
+      },
+      "op": "scaleToYield"
+    },
+    {
+      "expect": 1.5,
+      "id": "yield-halve-batch",
+      "input": {
+        "desiredYield": 4,
+        "originalYield": 8,
+        "precision": 2,
+        "value": 3
+      },
+      "op": "scaleToYield"
+    },
+    {
+      "expect": 2.25,
+      "id": "yield-same-batch",
+      "input": {
+        "desiredYield": 6,
+        "originalYield": 6,
+        "precision": 2,
+        "value": 2.25
+      },
+      "op": "scaleToYield"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "package": "encoding",
+  "description": "Decoding: given these bytes for this content type, produce this value. Encoding is not asserted byte-for-byte because serializer formatting differs legitimately across ecosystems.",
+  "cases": [
+    {
+      "expect": {
+        "count": 3,
+        "enabled": true,
+        "name": "widget",
+        "tags": [
+          "a",
+          "b"
+        ]
+      },
+      "id": "decode-application/json",
+      "input": {
+        "contentType": "application/json",
+        "encoded": "{\"name\":\"widget\",\"count\":3,\"enabled\":true,\"tags\":[\"a\",\"b\"]}"
+      },
+      "note": {
+        "goRoundTripsCleanly": true
+      },
+      "op": "decode"
+    },
+    {
+      "expect": {
+        "count": 3,
+        "enabled": true,
+        "name": "widget",
+        "tags": [
+          "a",
+          "b"
+        ]
+      },
+      "id": "decode-application/yaml",
+      "input": {
+        "contentType": "application/yaml",
+        "encoded": "name: widget\ncount: 3\nenabled: true\ntags:\n    - a\n    - b\n"
+      },
+      "note": {
+        "goRoundTripsCleanly": true
+      },
+      "op": "decode"
+    },
+    {
+      "expect": {
+        "count": 3,
+        "enabled": true,
+        "name": "widget",
+        "tags": [
+          "a",
+          "b"
+        ]
+      },
+      "id": "decode-application/xml",
+      "input": {
+        "contentType": "application/xml",
+        "encoded": "\u003cpayload\u003e\u003cname\u003ewidget\u003c/name\u003e\u003ccount\u003e3\u003c/count\u003e\u003cenabled\u003etrue\u003c/enabled\u003e\u003ctags\u003ea\u003c/tags\u003e\u003ctags\u003eb\u003c/tags\u003e\u003c/payload\u003e"
+      },
+      "note": {
+        "goRoundTripsCleanly": true
+      },
+      "op": "decode"
+    },
+    {
+      "expect": {
+        "count": 3,
+        "enabled": true,
+        "name": "widget",
+        "tags": [
+          "a",
+          "b"
+        ]
+      },
+      "id": "decode-application/toml",
+      "input": {
+        "contentType": "application/toml",
+        "encoded": "name = \"widget\"\ncount = 3\nenabled = true\ntags = [\"a\", \"b\"]\n"
+      },
+      "note": {
+        "goRoundTripsCleanly": true
+      },
+      "op": "decode"
+    }
+  ]
+}

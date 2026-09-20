@@ -1,0 +1,108 @@
+{
+  "package": "identifiers",
+  "description": "ULID validation. Generation is random and unvectorable; its shape is not.",
+  "cases": [
+    {
+      "expect": {
+        "valid": true
+      },
+      "id": "generated-is-valid",
+      "input": {
+        "value": "dao2a5cn9qd4db4ei020"
+      },
+      "op": "validate"
+    },
+    {
+      "expect": {
+        "valid": true
+      },
+      "id": "known-good-xid",
+      "input": {
+        "value": "9m4e2mr0ui3e8a215n4g"
+      },
+      "op": "validate"
+    },
+    {
+      "expect": {
+        "valid": false
+      },
+      "id": "empty",
+      "input": {
+        "value": ""
+      },
+      "op": "validate"
+    },
+    {
+      "expect": {
+        "valid": false
+      },
+      "id": "too-short-19",
+      "input": {
+        "value": "9m4e2mr0ui3e8a215n4"
+      },
+      "op": "validate"
+    },
+    {
+      "expect": {
+        "valid": false
+      },
+      "id": "too-long-21",
+      "input": {
+        "value": "9m4e2mr0ui3e8a215n4gg"
+      },
+      "op": "validate"
+    },
+    {
+      "expect": {
+        "valid": false
+      },
+      "id": "uppercase-rejected",
+      "input": {
+        "value": "9M4E2MR0UI3E8A215N4G"
+      },
+      "op": "validate"
+    },
+    {
+      "expect": {
+        "valid": false
+      },
+      "id": "ulid-is-not-an-xid",
+      "input": {
+        "value": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+      },
+      "op": "validate"
+    },
+    {
+      "expect": {
+        "valid": false
+      },
+      "id": "nanoid-is-not-an-xid",
+      "input": {
+        "value": "V1StGXR8_Z5jdHi6B-myT"
+      },
+      "op": "validate"
+    },
+    {
+      "expect": {
+        "valid": false
+      },
+      "id": "uuid-is-not-an-xid",
+      "input": {
+        "value": "f47ac10b-58cc-0372-8567-0e02b2c3d479"
+      },
+      "op": "validate"
+    },
+    {
+      "expect": 20,
+      "id": "generated-length",
+      "input": {},
+      "op": "newLength"
+    },
+    {
+      "expect": true,
+      "id": "generated-is-lowercase",
+      "input": {},
+      "op": "newIsLowercase"
+    }
+  ]
+}
