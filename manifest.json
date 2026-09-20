@@ -4,9 +4,9 @@
   "files": [
     {
       "path": "vectors/bitmask.json",
-      "sha256": "5bae7ae272890986aff321d23b8441f9463d86d17c3b7086d7fcb820ed84ca4f",
+      "sha256": "f6a9e88acad658b70eac5c6637c211caf0457dca9b4e94b842d74caed597e100",
       "package": "bitmask",
-      "cases": 13
+      "cases": 18
     },
     {
       "path": "vectors/encoding.json",
@@ -33,5 +33,5 @@
       "cases": 5
     }
   ],
-  "totalCases": 53
+  "totalCases": 58
 }

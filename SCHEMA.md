@@ -43,3 +43,21 @@ One file per package, `vectors/<package>.json`:
    correct; neither may misread a document.
 3. **Nothing that needs a clock, a network or entropy.** If the answer can differ on a
    Tuesday, it is not a vector. Inject a fixed seed instead, or leave it out.
+4. **Every `op` must be dispatchable on its own.** A runner switches on `op` and never parses
+   `id`. An earlier draft used `op: "value"` for `new`, `set`, `clear` and `toggle` alike and
+   only the `id` told them apart — which is unimplementable in a runner that treats `id` as a
+   label. If two cases need different code paths, they need different ops.
+
+## Writing a runner
+
+`generator/verify_test.go` is the reference: it reads the JSON generically, switches on `op`,
+and never reaches into the generator's types. Two things it does that yours must too:
+
+- **Fail on an unknown `op`.** A runner that ignores ops it does not handle reports green
+  while testing nothing. Every switch ends in `default: fail`.
+- **Defeat your test cache.** The vectors are data files your test framework probably does not
+  track as an input. Go's test cache does not: editing a vector and re-running reports a stale
+  `ok (cached)` and the change passes unexamined. The reference runner is invoked with
+  `go test -count=1`. Find your ecosystem's equivalent before trusting a green run — Vitest
+  keys on source files, Gradle's `test` task is `UP-TO-DATE` unless the vectors are declared
+  as inputs, and `swift test` caches per build plan.

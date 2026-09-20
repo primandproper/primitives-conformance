@@ -49,13 +49,15 @@ to run for it.
 
 | package | cases | what it pins |
 | --- | --- | --- |
-| `bitmask` | 13 | flag-set algebra: set, clear, toggle, has/all/any, count |
+| `bitmask` | 18 | flag-set algebra: set, clear, toggle, has/all/any, count |
 | `numbers` | 11 | decimal rounding and scaling at 32-bit float precision |
 | `errors` | 20 | every error code's HTTP status, both directions |
 | `retry` | 5 | the exponential backoff schedule, jitter off |
 | `encoding` | 4 | decoding JSON/YAML/XML/TOML to one canonical value |
 
-53 cases. See [SCHEMA.md](SCHEMA.md) for the file format.
+58 cases, run in CI against a live `primitives-go` checkout by
+[`generator/verify_test.go`](generator/verify_test.go) — the reference runner, and the shape a
+port's own runner should copy. See [SCHEMA.md](SCHEMA.md) for the file format.
 
 ## Consuming this
 

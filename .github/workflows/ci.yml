@@ -1,0 +1,83 @@
+# The vectors are only worth something if something runs them. This runs the
+# reference runner (generator/verify_test.go) against a live primitives-go
+# checkout, so a vector that drifts from the code fails here — in either
+# direction: a stale vector, or a behaviour change nobody meant to make.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: vectors match primitives-go
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: primitives-conformance
+
+      # generator/go.mod has `replace ... => ../../primitives-go`, so the layout
+      # here has to mirror a developer's: the two repos as siblings.
+      - uses: actions/checkout@v4
+        with:
+          repository: primandproper/primitives-go
+          path: primitives-go
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: primitives-conformance/generator/go.mod
+          cache-dependency-path: primitives-conformance/generator/go.sum
+
+      # -count=1 is load-bearing. The vectors live outside the package
+      # directory, so Go's test cache does not track them: without this, editing
+      # a vector and re-running reports a stale `ok (cached)` and the change
+      # passes unexamined. Every port's runner needs its own version of this.
+      - name: Run the vectors
+        working-directory: primitives-conformance/generator
+        run: go test -count=1 -v ./...
+
+      - name: Manifest matches the vectors on disk
+        working-directory: primitives-conformance
+        run: |
+          python3 - <<'PY'
+          import json, hashlib, pathlib, sys
+          m = json.load(open("manifest.json"))
+          bad = False
+          on_disk = {str(p) for p in pathlib.Path("vectors").glob("*.json")}
+          listed = {f["path"] for f in m["files"]}
+          if on_disk != listed:
+              print(f"::error::manifest lists {sorted(listed)} but vectors/ holds {sorted(on_disk)}")
+              bad = True
+          for f in m["files"]:
+              actual = hashlib.sha256(pathlib.Path(f["path"]).read_bytes()).hexdigest()
+              if actual != f["sha256"]:
+                  print(f"::error::{f['path']} changed but manifest.json was not rebuilt")
+                  bad = True
+          total = sum(len(json.load(open(f["path"]))["cases"]) for f in m["files"])
+          if total != m["totalCases"]:
+              print(f"::error::manifest says {m['totalCases']} cases, vectors hold {total}")
+              bad = True
+          sys.exit(1 if bad else 0)
+          PY
+
+      - name: Vectors are regenerable, and committed output is current
+        working-directory: primitives-conformance/generator
+        run: |
+          go run . ../vectors
+          # identifiers used to embed a freshly generated ID; nothing does now,
+          # so regeneration must be a no-op. If this ever fails, either the
+          # generator became non-deterministic or primitives-go changed.
+          cd .. && git diff --exit-code -- vectors/ || {
+            echo "::error::regenerating produced different vectors than are committed"
+            exit 1
+          }

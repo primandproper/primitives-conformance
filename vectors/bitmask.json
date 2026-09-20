@@ -11,13 +11,29 @@
           4
         ]
       },
-      "op": "value"
+      "op": "new"
+    },
+    {
+      "expect": 0,
+      "id": "new-of-nothing-is-zero",
+      "input": {
+        "flags": []
+      },
+      "op": "new"
     },
     {
       "expect": true,
-      "id": "from-zero-is-empty",
+      "id": "zero-is-empty",
       "input": {
         "value": 0
+      },
+      "op": "isEmpty"
+    },
+    {
+      "expect": false,
+      "id": "nonzero-is-not-empty",
+      "input": {
+        "value": 1
       },
       "op": "isEmpty"
     },
@@ -31,7 +47,18 @@
         ],
         "value": 1
       },
-      "op": "value"
+      "op": "set"
+    },
+    {
+      "expect": 1,
+      "id": "set-existing-is-idempotent",
+      "input": {
+        "flags": [
+          1
+        ],
+        "value": 1
+      },
+      "op": "set"
     },
     {
       "expect": 5,
@@ -42,7 +69,18 @@
         ],
         "value": 7
       },
-      "op": "value"
+      "op": "clear"
+    },
+    {
+      "expect": 1,
+      "id": "clear-absent-is-noop",
+      "input": {
+        "flags": [
+          2
+        ],
+        "value": 1
+      },
+      "op": "clear"
     },
     {
       "expect": 5,
@@ -54,7 +92,7 @@
         ],
         "value": 3
       },
-      "op": "value"
+      "op": "toggle"
     },
     {
       "expect": true,
@@ -123,6 +161,17 @@
       "op": "hasAny"
     },
     {
+      "expect": false,
+      "id": "hasAny-on-empty-is-false",
+      "input": {
+        "flags": [
+          1
+        ],
+        "value": 0
+      },
+      "op": "hasAny"
+    },
+    {
       "expect": 3,
       "id": "count-counts-set-bits",
       "input": {
@@ -131,15 +180,12 @@
       "op": "count"
     },
     {
-      "expect": false,
-      "id": "hasAny-of-nothing-is-false",
+      "expect": 0,
+      "id": "count-of-empty-is-zero",
       "input": {
-        "flags": [
-          1
-        ],
         "value": 0
       },
-      "op": "hasAny"
+      "op": "count"
     }
   ]
 }

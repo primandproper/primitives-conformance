@@ -39,22 +39,33 @@ func bitmaskCases() []any {
 	add := func(id, op string, in, exp any) { out = append(out, map[string]any{"id": id, "op": op, "input": in, "expect": exp}) }
 
 	m := bitmask.New(A, C)
-	add("new-sets-listed-flags", "value", map[string]any{"flags": []uint32{A, C}}, m.Value())
+	add("new-sets-listed-flags", "new", map[string]any{"flags": []uint32{A, C}}, m.Value())
 
-	v := bitmask.FromValue[uint32](0)
-	add("from-zero-is-empty", "isEmpty", map[string]any{"value": uint32(0)}, v.IsEmpty())
+	empty := bitmask.New[uint32]()
+	add("new-of-nothing-is-zero", "new", map[string]any{"flags": []uint32{}}, empty.Value())
 
-	s := bitmask.FromValue(A)
-	s2 := s.Set(B, D)
-	add("set-adds-flags", "value", map[string]any{"value": A, "flags": []uint32{B, D}}, s2.Value())
+	z := bitmask.FromValue[uint32](0)
+	add("zero-is-empty", "isEmpty", map[string]any{"value": uint32(0)}, z.IsEmpty())
+	nz := bitmask.FromValue(A)
+	add("nonzero-is-not-empty", "isEmpty", map[string]any{"value": A}, nz.IsEmpty())
 
-	c := bitmask.FromValue(A | B | C)
-	c2 := c.Clear(B)
-	add("clear-removes-only-named", "value", map[string]any{"value": A | B | C, "flags": []uint32{B}}, c2.Value())
+	s1 := bitmask.FromValue(A)
+	s2 := s1.Set(B, D)
+	add("set-adds-flags", "set", map[string]any{"value": A, "flags": []uint32{B, D}}, s2.Value())
+	s3 := bitmask.FromValue(A)
+	s4 := s3.Set(A)
+	add("set-existing-is-idempotent", "set", map[string]any{"value": A, "flags": []uint32{A}}, s4.Value())
 
-	t := bitmask.FromValue(A | B)
-	t2 := t.Toggle(B, C)
-	add("toggle-flips-each", "value", map[string]any{"value": A | B, "flags": []uint32{B, C}}, t2.Value())
+	c1 := bitmask.FromValue(A | B | C)
+	c2 := c1.Clear(B)
+	add("clear-removes-only-named", "clear", map[string]any{"value": A | B | C, "flags": []uint32{B}}, c2.Value())
+	c3 := bitmask.FromValue(A)
+	c4 := c3.Clear(B)
+	add("clear-absent-is-noop", "clear", map[string]any{"value": A, "flags": []uint32{B}}, c4.Value())
+
+	t1 := bitmask.FromValue(A | B)
+	t2 := t1.Toggle(B, C)
+	add("toggle-flips-each", "toggle", map[string]any{"value": A | B, "flags": []uint32{B, C}}, t2.Value())
 
 	h := bitmask.FromValue(A | C)
 	add("has-present", "has", map[string]any{"value": A | C, "flag": C}, h.Has(C))
@@ -63,11 +74,14 @@ func bitmaskCases() []any {
 	add("hasAll-complete-is-true", "hasAll", map[string]any{"value": A | C, "flags": []uint32{A, C}}, h.HasAll(A, C))
 	add("hasAny-one-match-is-true", "hasAny", map[string]any{"value": A | C, "flags": []uint32{B, C}}, h.HasAny(B, C))
 	add("hasAny-no-match-is-false", "hasAny", map[string]any{"value": A | C, "flags": []uint32{B, D}}, h.HasAny(B, D))
-	cnt := bitmask.FromValue(A | C | D)
-	add("count-counts-set-bits", "count", map[string]any{"value": A | C | D}, cnt.Count())
 
 	e := bitmask.FromValue[uint32](0)
-	add("hasAny-of-nothing-is-false", "hasAny", map[string]any{"value": uint32(0), "flags": []uint32{A}}, e.HasAny(A))
+	add("hasAny-on-empty-is-false", "hasAny", map[string]any{"value": uint32(0), "flags": []uint32{A}}, e.HasAny(A))
+
+	cnt := bitmask.FromValue(A | C | D)
+	add("count-counts-set-bits", "count", map[string]any{"value": A | C | D}, cnt.Count())
+	cnt0 := bitmask.FromValue[uint32](0)
+	add("count-of-empty-is-zero", "count", map[string]any{"value": uint32(0)}, cnt0.Count())
 	return out
 }
 
