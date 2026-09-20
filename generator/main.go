@@ -7,13 +7,11 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/primandproper/primitives-go/v2/bitmask"
 	"github.com/primandproper/primitives-go/v2/encoding"
 	errhttp "github.com/primandproper/primitives-go/v2/errors/http"
-	"github.com/primandproper/primitives-go/v2/identifiers"
 	"github.com/primandproper/primitives-go/v2/numbers"
 	retrycfg "github.com/primandproper/primitives-go/v2/retry/config"
 )
@@ -99,33 +97,6 @@ func numbersCases() []any {
 	yield("yield-double-batch", 1.5, 4, 8, 2)
 	yield("yield-halve-batch", 3, 8, 4, 2)
 	yield("yield-same-batch", 2.25, 6, 6, 2)
-	return out
-}
-
-func identifiersCases() []any {
-	out := []any{}
-	add := func(id, in string) {
-		err := identifiers.Validate(in)
-		out = append(out, map[string]any{"id": id, "op": "validate",
-			"input": map[string]any{"value": in}, "expect": map[string]any{"valid": err == nil}})
-	}
-	generated := identifiers.New()
-	add("generated-is-valid", generated)
-	// xid: 20 characters, lowercase base32-hex, 12 raw bytes.
-	add("known-good-xid", "9m4e2mr0ui3e8a215n4g")
-	add("empty", "")
-	add("too-short-19", "9m4e2mr0ui3e8a215n4")
-	add("too-long-21", "9m4e2mr0ui3e8a215n4gg")
-	add("uppercase-rejected", "9M4E2MR0UI3E8A215N4G")
-	// A well-formed ULID is 26 characters and is NOT a valid identifier here.
-	add("ulid-is-not-an-xid", "01ARZ3NDEKTSV4RRFFQ69G5FAV")
-	// A default nanoid is 21 characters from a URL-safe alphabet.
-	add("nanoid-is-not-an-xid", "V1StGXR8_Z5jdHi6B-myT")
-	add("uuid-is-not-an-xid", "f47ac10b-58cc-0372-8567-0e02b2c3d479")
-	out = append(out, map[string]any{"id": "generated-length", "op": "newLength",
-		"input": map[string]any{}, "expect": len(generated)})
-	out = append(out, map[string]any{"id": "generated-is-lowercase", "op": "newIsLowercase",
-		"input": map[string]any{}, "expect": generated == strings.ToLower(generated)})
 	return out
 }
 
@@ -253,7 +224,6 @@ func main() {
 	}
 	write(dir, "bitmask", file{"bitmask", "Flag-set algebra over an unsigned integer. Values are decimal integers, not bit strings.", bitmaskCases()})
 	write(dir, "numbers", file{"numbers", "Decimal rounding and scaling at 32-bit float precision. Expected values are the shortest decimal that round-trips a float32.", numbersCases()})
-	write(dir, "identifiers", file{"identifiers", "ULID validation. Generation is random and unvectorable; its shape is not.", identifiersCases()})
 	write(dir, "errors", file{"errors", "The error-code to HTTP-status mapping. A port that disagrees here returns the wrong status to a real client.", errorsCases()})
 	write(dir, "retry", file{"retry", "The exponential backoff schedule with jitter off. Delays are milliseconds.", retryCases()})
 	write(dir, "encoding", file{"encoding", "Decoding: given these bytes for this content type, produce this value. Encoding is not asserted byte-for-byte because serializer formatting differs legitimately across ecosystems.", encodingCases(ctx)})

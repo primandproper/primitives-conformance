@@ -9,7 +9,11 @@ its own test framework already is.
 
 ## Why this exists
 
-Four repositories implement `identifiers`. Here is what each one's generator returns today:
+**A name is not a contract.** Four repositories can ship a package called `identifiers` and
+mean four different things by it, and nothing will tell you until a client's ID is rejected
+by a server in production.
+
+That is not hypothetical. Writing the first vectors turned it up immediately:
 
 | port | scheme | length | accepted by `primitives-go`'s `Validate`? |
 | --- | --- | --- | --- |
@@ -18,12 +22,13 @@ Four repositories implement `identifiers`. Here is what each one's generator ret
 | `primitives-kt` | ULID (Crockford) | 26 | ❌ |
 | `primitives-ts` | nanoid (`urlAlphabet`) | 21 | ❌ |
 
-A Kotlin or TypeScript client that generates an ID and sends it to a `platform-go` service
-gets rejected at the door. Nobody wrote that bug; it grew, because four repositories agreed
-on a package name and never on its behaviour. This repository is the thing that would have
-caught it the day it appeared.
+The resolution was not to converge four implementations. It was to notice that **a client
+has no business generating a server's identifiers at all** — the server issues them, the
+client receives opaque strings, and validating an ID the server just sent you proves
+nothing. So `identifiers` is a `primitives-go` package, it has no vectors, and the three
+non-Go ports drop it.
 
-**A name is not a contract.** That is the whole thesis.
+That is the suite working. Its first act was to delete a package rather than to test one.
 
 ## Scope
 
@@ -46,12 +51,11 @@ to run for it.
 | --- | --- | --- |
 | `bitmask` | 13 | flag-set algebra: set, clear, toggle, has/all/any, count |
 | `numbers` | 11 | decimal rounding and scaling at 32-bit float precision |
-| `identifiers` | 11 | xid validation, and that ULIDs/nanoids/UUIDs are *not* valid |
 | `errors` | 20 | every error code's HTTP status, both directions |
 | `retry` | 5 | the exponential backoff schedule, jitter off |
 | `encoding` | 4 | decoding JSON/YAML/XML/TOML to one canonical value |
 
-62 cases. See [SCHEMA.md](SCHEMA.md) for the file format.
+53 cases. See [SCHEMA.md](SCHEMA.md) for the file format.
 
 ## Consuming this
 

@@ -21,12 +21,6 @@
       "cases": 20
     },
     {
-      "path": "vectors/identifiers.json",
-      "sha256": "5d13d6459509595a1d1ac69029911f6818efd5dec09deae984c621cc505e61fe",
-      "package": "identifiers",
-      "cases": 11
-    },
-    {
       "path": "vectors/numbers.json",
       "sha256": "3c02f145760e157ec8957794d4fda7fd411cac78b68c99886dd1c8fee7d50cf7",
       "package": "numbers",
@@ -39,5 +33,5 @@
       "cases": 5
     }
   ],
-  "totalCases": 64
+  "totalCases": 53
 }
