@@ -81,3 +81,17 @@ jobs:
             echo "::error::regenerating produced different vectors than are committed"
             exit 1
           }
+
+  tools:
+    name: port tooling
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shellcheck
+        run: shellcheck tools/*.sh
+
+      # Offline: a stub gh serves fake releases, so this needs no token and
+      # does not depend on which tags happen to be published.
+      - name: vendor-conformance.sh
+        run: tools/test-vendor-conformance.sh

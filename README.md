@@ -72,7 +72,8 @@ primitives-ts/
     vectors/*.json
 ```
 
-Copy `VERSION`, `manifest.json` and `vectors/` into the port, then run
+Vendor a tag with [`tools/vendor-conformance.sh`](tools/vendor-conformance.sh)
+(`tools/vendor-conformance.sh v1 testdata/conformance`), then run
 [`tools/verify-pin.sh`](tools/verify-pin.sh) from CI. It compares the vendored pin against
 the newest tag here and fails when the port is behind — so drift is a red build rather than
 a silent divergence.
