@@ -21,6 +21,11 @@ jobs:
   verify:
     name: vectors match primitives-go
     runs-on: ubuntu-latest
+    # The generator's indirect requires only mirror whatever primitives-go main
+    # needs today, so every dependency bump there would otherwise turn this red
+    # with "go mod tidy" and nothing about the vectors would have changed.
+    env:
+      GOFLAGS: -mod=mod
     steps:
       - uses: actions/checkout@v4
         with:
