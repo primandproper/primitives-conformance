@@ -63,6 +63,25 @@ jobs:
               if actual != f["sha256"]:
                   print(f"::error::{f['path']} changed but manifest.json was not rebuilt")
                   bad = True
+          # The roster is what obligates a port, so a typo in it silently
+          # releases one. primitives-go is on every roster because a vector
+          # file only exists by being generated from it.
+          known = {"primitives-go", "primitives-kt", "primitives-swift", "primitives-ts"}
+          for f in m["files"]:
+              ports = f.get("ports")
+              if not isinstance(ports, list) or not ports:
+                  print(f"::error::{f['path']} has no ports roster")
+                  bad = True
+                  continue
+              if unknown := sorted(set(ports) - known):
+                  print(f"::error::{f['path']} names unknown ports {unknown}")
+                  bad = True
+              if len(ports) != len(set(ports)):
+                  print(f"::error::{f['path']} names a port twice")
+                  bad = True
+              if "primitives-go" not in ports:
+                  print(f"::error::{f['path']} does not name primitives-go, which every vector file is generated from")
+                  bad = True
           total = sum(len(json.load(open(f["path"]))["cases"]) for f in m["files"])
           if total != m["totalCases"]:
               print(f"::error::manifest says {m['totalCases']} cases, vectors hold {total}")

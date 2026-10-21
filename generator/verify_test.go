@@ -1,9 +1,9 @@
 package main
 
 // This is the reference runner. It reads ../vectors/*.json exactly as a port's
-// runner must — generically, dispatching on `op`, never reaching into the
-// generator's types — and asserts the committed vectors still describe what
-// primitives-go does.
+// runner must (from the manifest's roster, generically, dispatching on `op`,
+// never reaching into the generator's types) and asserts the committed vectors
+// still describe what primitives-go does.
 //
 // It is a regression guard in both directions: a vector that drifts from the
 // code fails here, and so does a behaviour change in primitives-go that nobody
@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"testing"
 	"time"
@@ -38,9 +39,115 @@ type vectorFile struct {
 	Cases   []vectorCase `json:"cases"`
 }
 
-func load(t *testing.T, name string) vectorFile {
+type manifestFile struct {
+	Path    string   `json:"path"`
+	Package string   `json:"package"`
+	Ports   []string `json:"ports"`
+}
+
+type manifest struct {
+	Files []manifestFile `json:"files"`
+}
+
+// port is the roster name this runner answers to. A port's runner hard-codes
+// its own.
+const port = "primitives-go"
+
+// runners is every package this runner knows how to run. It is not the list
+// of what gets run: the manifest's roster decides that.
+var runners = map[string]func(*testing.T, vectorFile){
+	"bitmask":  runBitmask,
+	"numbers":  runNumbers,
+	"errors":   runErrors,
+	"retry":    runRetry,
+	"encoding": runEncoding,
+}
+
+// plan splits the manifest into the files that name port and have a runner,
+// and the files that name port and do not. A file that does not name port is
+// in neither: it is not this port's concern, and skipping it is not a failure.
+func plan(m manifest, port string, runners map[string]func(*testing.T, vectorFile)) (run, missing []manifestFile) {
+	for _, f := range m.Files {
+		if !slices.Contains(f.Ports, port) {
+			continue
+		}
+		if _, ok := runners[f.Package]; ok {
+			run = append(run, f)
+		} else {
+			missing = append(missing, f)
+		}
+	}
+	return run, missing
+}
+
+// TestVectors is driven by the manifest, never by a list of its own. A runner
+// that only ran the packages it already knew about would read green while a
+// file naming it went untested.
+func TestVectors(t *testing.T) {
+	run, missing := plan(loadManifest(t), port, runners)
+	for _, f := range missing {
+		t.Errorf("%s names %s, but this runner has no arm for package %q", f.Path, port, f.Package)
+	}
+	for _, f := range run {
+		t.Run(f.Package, func(t *testing.T) {
+			runners[f.Package](t, load(t, f))
+		})
+	}
+}
+
+func TestPlan(t *testing.T) {
+	noop := func(*testing.T, vectorFile) {}
+	known := map[string]func(*testing.T, vectorFile){"bitmask": noop, "retry": noop}
+
+	t.Run("runs a file that names the port", func(t *testing.T) {
+		m := manifest{Files: []manifestFile{{Path: "vectors/bitmask.json", Package: "bitmask", Ports: []string{"primitives-go", "primitives-ts"}}}}
+		run, missing := plan(m, "primitives-go", known)
+		if len(run) != 1 || run[0].Package != "bitmask" || len(missing) != 0 {
+			t.Fatalf("got run=%v missing=%v, want only bitmask run", run, missing)
+		}
+	})
+
+	t.Run("skips a file that does not name the port", func(t *testing.T) {
+		m := manifest{Files: []manifestFile{{Path: "vectors/retry.json", Package: "retry", Ports: []string{"primitives-ts"}}}}
+		run, missing := plan(m, "primitives-go", known)
+		if len(run) != 0 || len(missing) != 0 {
+			t.Fatalf("got run=%v missing=%v, want the file ignored", run, missing)
+		}
+	})
+
+	t.Run("reports a file that names the port and has no runner", func(t *testing.T) {
+		m := manifest{Files: []manifestFile{{Path: "vectors/filtering.json", Package: "filtering", Ports: []string{"primitives-go"}}}}
+		run, missing := plan(m, "primitives-go", known)
+		if len(run) != 0 || len(missing) != 1 || missing[0].Package != "filtering" {
+			t.Fatalf("got run=%v missing=%v, want filtering missing", run, missing)
+		}
+	})
+
+	t.Run("a runner arm does not put a file in scope", func(t *testing.T) {
+		m := manifest{Files: []manifestFile{{Path: "vectors/bitmask.json", Package: "bitmask", Ports: []string{"primitives-swift"}}}}
+		run, missing := plan(m, "primitives-go", known)
+		if len(run) != 0 || len(missing) != 0 {
+			t.Fatalf("got run=%v missing=%v, want the file ignored", run, missing)
+		}
+	})
+}
+
+func loadManifest(t *testing.T) manifest {
 	t.Helper()
-	b, err := os.ReadFile(filepath.Join("..", "vectors", name+".json"))
+	b, err := os.ReadFile(filepath.Join("..", "manifest.json"))
+	if err != nil {
+		t.Fatalf("reading manifest: %v", err)
+	}
+	var m manifest
+	if err := json.Unmarshal(b, &m); err != nil {
+		t.Fatalf("parsing manifest: %v", err)
+	}
+	return m
+}
+
+func load(t *testing.T, mf manifestFile) vectorFile {
+	t.Helper()
+	b, err := os.ReadFile(filepath.Join("..", mf.Path))
 	if err != nil {
 		t.Fatalf("reading vectors: %v", err)
 	}
@@ -48,8 +155,11 @@ func load(t *testing.T, name string) vectorFile {
 	if err := json.Unmarshal(b, &f); err != nil {
 		t.Fatalf("parsing vectors: %v", err)
 	}
+	if f.Package != mf.Package {
+		t.Fatalf("%s holds package %q, manifest says %q", mf.Path, f.Package, mf.Package)
+	}
 	if len(f.Cases) == 0 {
-		t.Fatalf("%s.json has no cases", name)
+		t.Fatalf("%s has no cases", mf.Path)
 	}
 	return f
 }
@@ -63,13 +173,13 @@ func into[T any](t *testing.T, raw json.RawMessage) T {
 	return v
 }
 
-func TestBitmaskVectors(t *testing.T) {
+func runBitmask(t *testing.T, f vectorFile) {
 	type in struct {
 		Value uint32   `json:"value"`
 		Flag  uint32   `json:"flag"`
 		Flags []uint32 `json:"flags"`
 	}
-	for _, c := range load(t, "bitmask").Cases {
+	for _, c := range f.Cases {
 		t.Run(c.ID, func(t *testing.T) {
 			i := into[in](t, c.Input)
 			var got any
@@ -112,7 +222,7 @@ func TestBitmaskVectors(t *testing.T) {
 	}
 }
 
-func TestNumbersVectors(t *testing.T) {
+func runNumbers(t *testing.T, f vectorFile) {
 	type in struct {
 		Value         float32 `json:"value"`
 		Factor        float32 `json:"factor"`
@@ -120,7 +230,7 @@ func TestNumbersVectors(t *testing.T) {
 		OriginalYield int     `json:"originalYield"`
 		DesiredYield  int     `json:"desiredYield"`
 	}
-	for _, c := range load(t, "numbers").Cases {
+	for _, c := range f.Cases {
 		t.Run(c.ID, func(t *testing.T) {
 			i := into[in](t, c.Input)
 			var got float32
@@ -145,11 +255,11 @@ func TestNumbersVectors(t *testing.T) {
 	}
 }
 
-func TestErrorsVectors(t *testing.T) {
+func runErrors(t *testing.T, f vectorFile) {
 	type in struct {
 		Code string `json:"code"`
 	}
-	for _, c := range load(t, "errors").Cases {
+	for _, c := range f.Cases {
 		t.Run(c.ID, func(t *testing.T) {
 			i := into[in](t, c.Input)
 			if c.Op != "httpStatusForCode" {
@@ -160,7 +270,7 @@ func TestErrorsVectors(t *testing.T) {
 	}
 }
 
-func TestRetryVectors(t *testing.T) {
+func runRetry(t *testing.T, f vectorFile) {
 	type in struct {
 		InitialDelayMs int64   `json:"initialDelayMs"`
 		MaxDelayMs     int64   `json:"maxDelayMs"`
@@ -173,7 +283,7 @@ func TestRetryVectors(t *testing.T) {
 		DelayForMs          []int64 `json:"delayForMs"`
 		ScheduledDelayForMs []int64 `json:"scheduledDelayForMs"`
 	}
-	for _, c := range load(t, "retry").Cases {
+	for _, c := range f.Cases {
 		t.Run(c.ID, func(t *testing.T) {
 			i := into[in](t, c.Input)
 			cfg := retrycfg.Config{
@@ -205,13 +315,13 @@ func TestRetryVectors(t *testing.T) {
 	}
 }
 
-func TestEncodingVectors(t *testing.T) {
+func runEncoding(t *testing.T, f vectorFile) {
 	type in struct {
 		ContentType string `json:"contentType"`
 		Encoded     string `json:"encoded"`
 	}
 	ctx := context.Background()
-	for _, c := range load(t, "encoding").Cases {
+	for _, c := range f.Cases {
 		t.Run(c.ID, func(t *testing.T) {
 			i := into[in](t, c.Input)
 			if c.Op != "decode" {

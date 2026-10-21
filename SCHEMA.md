@@ -24,6 +24,37 @@ One file per package, `vectors/<package>.json`:
 - **`input`** and **`expect`** are plain JSON. No language-specific encodings, no base64
   unless the value is genuinely bytes.
 
+## Manifest
+
+`manifest.json` lists every vector file with its hash, its case count, and its **roster**:
+the ports that file obligates.
+
+```jsonc
+{
+  "version": "v1",
+  "source": "github.com/primandproper/primitives-go",
+  "files": [
+    {
+      "path": "vectors/bitmask.json",
+      "sha256": "f6a9…e100",
+      "package": "bitmask",
+      "cases": 18,
+      "ports": ["primitives-go", "primitives-kt", "primitives-swift", "primitives-ts"]
+    }
+  ],
+  "totalCases": 58
+}
+```
+
+- **`ports`** names each port by its repository name. A file obligates exactly the ports it
+  names and no others: the suite tests the overlap between ports, it does not decide what a
+  port carries. Putting a port on a roster is the decision that the port carries the package.
+- **`primitives-go` is on every roster.** Vectors are generated from it, so a package that
+  `primitives-go` does not have cannot have a vector file, whichever other ports carry it.
+- CI rejects a file with no roster, a name it does not recognise, or a duplicate. A typo in a
+  roster would silently release a port from a file, which is the failure the roster exists to
+  prevent.
+
 ## Type conventions
 
 | concept | representation | why |
@@ -51,8 +82,14 @@ One file per package, `vectors/<package>.json`:
 ## Writing a runner
 
 `generator/verify_test.go` is the reference: it reads the JSON generically, switches on `op`,
-and never reaches into the generator's types. Two things it does that yours must too:
+and never reaches into the generator's types. Three things it does that yours must too:
 
+- **Drive the run from the roster.** Read `manifest.json`, pick the files whose `ports`
+  includes your port's name, and run each one. If a file names your port and your runner has
+  no code for its package, fail: a skipped file reads exactly like a passing one. If a file
+  does not name your port, skip it without failing or warning; it is not your concern. Never
+  run a fixed list of packages your runner already knows, because a new file naming you would
+  go untested and the build would stay green.
 - **Fail on an unknown `op`.** A runner that ignores ops it does not handle reports green
   while testing nothing. Every switch ends in `default: fail`.
 - **Defeat your test cache.** The vectors are data files your test framework probably does not
