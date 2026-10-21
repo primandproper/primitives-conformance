@@ -66,15 +66,19 @@ auth and no submodule:
 
 ```
 primitives-ts/
+  tools/
+    vendor-conformance.sh
+    verify-pin.sh
   testdata/conformance/
     VERSION         # v1
     manifest.json
     vectors/*.json
 ```
 
-Vendor a tag with [`tools/vendor-conformance.sh`](tools/vendor-conformance.sh)
-(`tools/vendor-conformance.sh v1 testdata/conformance`), then run
-[`tools/verify-pin.sh`](tools/verify-pin.sh) from CI. It compares the vendored pin against
+Copy [`tools/vendor-conformance.sh`](tools/vendor-conformance.sh) and
+[`tools/verify-pin.sh`](tools/verify-pin.sh) into the port's own `tools/` once. Vendor every
+tag with the first, starting with the initial one (`tools/vendor-conformance.sh v1
+testdata/conformance` from the port's root), then run `tools/verify-pin.sh` from CI. It compares the vendored pin against
 the newest tag here and fails when the port is behind — so drift is a red build rather than
 a silent divergence.
 

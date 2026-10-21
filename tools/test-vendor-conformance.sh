@@ -158,9 +158,33 @@ test_vendors_into_a_named_directory() {
   fi
 }
 
+test_verify_pin_remedy_fixes_a_named_directory() {
+  local name="verify-pin.sh's remedy fixes a port vendored into a named directory"
+  local dir="$work/ports/remedy" log="$work/remedy.log" args
+  mkdir -p "$dir/conformance"
+  cp -R "$FAKE_ORIGIN/v1/." "$dir/conformance/"
+  if (cd "$dir" && "$VERIFY" conformance > "$log" 2>&1); then
+    fail "$name" "verify-pin.sh accepted a port pinned at v1"
+    return
+  fi
+  read -ra args < <(sed -n 's|^Update with: tools/vendor-conformance.sh ||p' "$log")
+  if [ "${#args[@]}" -eq 0 ]; then
+    fail "$name" "no remedy in: $(cat "$log")"
+  elif ! (cd "$dir" && "$VENDOR" "${args[@]}" > "$log" 2>&1); then
+    fail "$name" "$(cat "$log")"
+  elif [ -e "$dir/testdata" ]; then
+    fail "$name" "the remedy vendored into testdata/conformance instead"
+  elif ! (cd "$dir" && "$VERIFY" conformance > /dev/null 2>&1); then
+    fail "$name" "verify-pin.sh still rejects the port"
+  else
+    pass "$name"
+  fi
+}
+
 test_vendors_into_an_empty_port
 test_upgrade_removes_withdrawn_vectors
 test_vendors_into_a_named_directory
+test_verify_pin_remedy_fixes_a_named_directory
 refused main "main is not a tag" "refuses a branch"
 refused v9 "v9 is not a tag" "refuses an unknown tag"
 refused v3-tampered "vectors/errors.json does not match" "refuses a vector that fails its checksum"

@@ -19,7 +19,7 @@ latest="$(gh api "repos/$REPO/tags" --jq '.[0].name' 2>/dev/null || true)"
 
 if [ "$pinned" != "$latest" ]; then
   echo "::error::conformance vectors are pinned at $pinned but $latest is published."
-  echo "Update with: tools/vendor-conformance.sh $latest"
+  echo "Update with: tools/vendor-conformance.sh $latest $VENDORED"
   exit 1
 fi
 
